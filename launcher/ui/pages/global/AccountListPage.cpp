@@ -141,14 +141,6 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
-                                "<br><br>"
-                                "If you have lost your account you can contact Microsoft for support."));
-        return;
-    }
-
     MinecraftAccountPtr account =
         OfflineLoginDialog::newAccount(this, tr("Please enter your desired username to add your offline account."));
 
@@ -206,17 +198,15 @@ void AccountListPage::updateButtonStates()
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     bool hasSelection = !selection.empty();
     bool accountIsReady = false;
-    bool accountIsOnline = false;
     if (hasSelection) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = account->accountType() != AccountType::Offline;
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionManageSkins->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionManageSkins->setEnabled(accountIsReady);
+    ui->actionRefresh->setEnabled(accountIsReady);
 
     if (m_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
